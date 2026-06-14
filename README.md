@@ -5,12 +5,13 @@ TraceIt is a modern Android application designed to help users report and find l
 ## 📋 Table of Contents
 - [Project Overview](#project-overview)
 - [Features](#features)
+- [User Flows](#user-flows)
+- [Functional Modules](#functional-modules)
+- [Data Architecture (ER Diagram)](#data-architecture-er-diagram)
 - [Tech Stack & Dependencies](#tech-stack--dependencies)
 - [Project Structure](#project-structure)
-- [Data Models](#data-models)
 - [Setup & Build Instructions](#setup--build-instructions)
 - [Firebase Configuration](#firebase-configuration)
-- [Contributors](#contributors)
 
 ## Project Overview
 - **App Name**: TraceIt
@@ -26,6 +27,79 @@ TraceIt is a modern Android application designed to help users report and find l
 - **Real-time Chat**: Connect directly with other users via an integrated chat system.
 - **Interactive UI**: Modern Material 3 interface with smooth animations and responsive layouts.
 - **Profile Management**: Manage your posts, track active/resolved items, and update your profile picture.
+
+## 🛤️ User Flows
+
+### 1. The "I Lost Something" Flow
+1.  **Splash & Auth**: User opens the app, sees the splash animation, and logs in.
+2.  **Dashboard**: Browses the list to see if their item was already "Found."
+3.  **Report**: If not found, clicks the **"+" (Add Post)** button.
+4.  **Creation**: Uploads a photo, selects **"I Lost It"**, and uses **GPS Auto-detect** for location.
+5.  **Publish**: Submits the post to the global feed.
+
+### 2. The "Communication & Resolution" Flow
+1.  **Connection**: A user clicks **"Contact Finder/Owner"** on an item detail page.
+2.  **Chat**: Opens a real-time chat to discuss verification and meeting details.
+3.  **Resolution**: Once the item is returned, the original poster clicks **"Mark as Resolved"**.
+4.  **Archive**: The item moves to the **"Resolved Items"** tab on the user's profile.
+
+## 🛠️ Functional Modules
+
+- **Authentication**: Integrated Firebase Auth with Google Sign-In for one-tap access.
+- **Discovery (Dashboard)**: Pinterest-style staggered grid with real-time search and category filtering.
+- **Post Interaction**: Dynamic detail pages with collapsing toolbars and context-aware action buttons.
+- **Real-time Messaging**: Instant chat synchronization powered by Firestore listeners.
+
+## 📊 Data Architecture (ER Diagram)
+
+```mermaid
+erDiagram
+    USER ||--o{ ITEM : "posts"
+    USER ||--o{ MESSAGE : "sends"
+    ITEM ||--o{ CHAT : "associates with"
+    CHAT ||--|{ MESSAGE : "contains"
+
+    USER {
+        string uid PK
+        string name
+        string email
+        string phoneNumber
+        string profilePictureUrl
+        timestamp createdAt
+    }
+
+    ITEM {
+        string itemId PK
+        string userId FK
+        string title
+        string description
+        string category
+        string status
+        string imageUrl
+        string locationName
+        double latitude
+        double longitude
+        boolean isResolved
+        timestamp createdAt
+    }
+
+    CHAT {
+        string chatId PK
+        string participant1Id FK
+        string participant2Id FK
+        string lastMessage
+        timestamp timestamp
+    }
+
+    MESSAGE {
+        string messageId PK
+        string chatId FK
+        string senderId FK
+        string receiverId FK
+        string text
+        timestamp timestamp
+    }
+```
 
 ## 🛠️ Tech Stack & Dependencies
 - **Language**: Java 11
@@ -44,39 +118,22 @@ TraceIt/
 │   │   │   ├── fragments/           # HomeFragment, MyPostsFragment, ProfileFragment
 │   │   │   ├── adapters/            # ItemAdapter, MessageAdapter
 │   │   │   ├── models/              # Item, User, Message
-│   │   │   └── utils/               # FirebaseHelper, Constants, ImageUtils, DummyDataUtils
+│   │   │   └── utils/               # FirebaseHelper, DummyDataUtils, ImageUtils
 │   │   ├── res/
 │   │   │   ├── layout/              # XML layouts for all screens
 │   │   │   ├── drawable/            # Backgrounds, badges, chat bubbles
-│   │   │   ├── anim/                # Slide & fade animations
-│   │   │   └── values/              # strings, colors (vibrant theme), themes
+│   │   │   ├── values/              # strings, colors (vibrant theme), themes
 │   │   └── AndroidManifest.xml
 │   └── build.gradle
-├── build.gradle
-├── settings.gradle
 └── README.md
 ```
 
 ## ⚙️ Setup & Build Instructions
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/Bylerma/Trace-t.git
-   ```
-2. **Open in Android Studio**: (Hedgehog or newer recommended).
-3. **Connect Firebase**:
-   - Add your `google-services.json` to the `app/` directory.
-   - Enable Email/Password and Google sign-in methods in the Firebase Console.
-4. **Configure SHA-1**:
-   - Run the `./gradlew signingReport` task and add your SHA-1 fingerprint to the Firebase Project Settings.
-5. **Update Web Client ID**:
-   - Update `default_web_client_id` in `app/src/main/res/values/strings.xml` with your Firebase Web Client ID.
-6. **Sync & Run**:
-   - Click "Sync Project with Gradle Files" and run on an emulator or device (API 26+).
-
-## Firebase Configuration
-- **Authentication**: Enable Email/Password and Google providers.
-- **Firestore**: Create a database in "Production" or "Test" mode.
-- **Storage**: Set up rules to allow authenticated users to upload images to `item_images/` and `profile_avatars/`.
+1. **Clone the repository**: `git clone https://github.com/Bylerma/Trace-t.git`
+2. **Connect Firebase**: Add your `google-services.json` to the `app/` directory.
+3. **Configure SHA-1**: Run `./gradlew signingReport` and add your SHA-1 to the Firebase Console.
+4. **Update Web Client ID**: Update `default_web_client_id` in `strings.xml`.
+5. **Sync & Run**: Sync Gradle and run on an emulator or device (API 26+).
 
 ---
 
